@@ -27,7 +27,7 @@ import eu.gemtec.UrlaubsSchreiber.PDF.IPDFService;
 public class NormieView extends VerticalLayout implements View {
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "NORMIE_VIEW";
-
+	private int unseen = 0;
 	@Inject
 	private IPDFService pdfService;
 	@Inject
@@ -54,7 +54,13 @@ public class NormieView extends VerticalLayout implements View {
 	FileDownloader fileDownloader;
 
 	private VerticalLayout makeAdminButtons() {
-		return new VerticalLayout(new Button("Manage " + entryDataacessService.getEntryList().size(), e -> {
+
+		entryDataacessService.getEntryList().forEach(e->{
+			if (!e.isSeen()) {
+				unseen++;
+			}
+		});
+		return new VerticalLayout(new Button("Manage " + unseen, e -> {
 			getUI().getNavigator().navigateTo(FelixView.VIEW_NAME);
 		}), new Button("Settings", e -> {
 			getUI().getNavigator().navigateTo(SettingsView.VIEW_NAME);

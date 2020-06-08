@@ -14,6 +14,7 @@ public class EntryDataacessService implements Serializable, IEntryDataacessServi
 	private EntityManager EntrysEm;
     private List<Entry> entryList;
 	
+	@SuppressWarnings("unchecked")
 	public EntryDataacessService() {
 		EntrysEm = Persistence.createEntityManagerFactory("entrys").createEntityManager();
 	    entryList = EntrysEm.createQuery("select e from Entry e").getResultList();
