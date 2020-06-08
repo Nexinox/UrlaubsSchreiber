@@ -1,6 +1,6 @@
 package eu.gemtec.UrlaubsSchreiber.MODEL;
 
-import java.util.Calendar;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,10 +17,10 @@ public class Entry {
 	private String vorname;
 	private String nachname;
 	@Column(name="start_date")
-	private Calendar start;
+	private Date start;
 	@Column(name="end_date")
-	private Calendar end;
-	
+	private Date end;
+	private boolean seen;
 
 	public Entry() {
 		super();
@@ -31,12 +31,13 @@ public class Entry {
 	 * @param start
 	 * @param end
 	 */
-	public Entry(String vorname, String nachname, Calendar start, Calendar end) {
+	public Entry(String vorname, String nachname, Date start, Date end) {
 		super();
 		this.vorname = vorname;
 		this.nachname = nachname;
 		this.start = start;
 		this.end = end;
+		this.seen = false;
 	}
 	public String getVorname() {
 		return vorname;
@@ -45,16 +46,16 @@ public class Entry {
 	public void setVorname(String vorname) {
 		this.vorname = vorname;
 	}
-	public Calendar getStart() {
+	public Date getStart() {
 		return start;
 	}
-	public void setStart(Calendar start) {
+	public void setStart(Date start) {
 		this.start = start;
 	}
-	public Calendar getEnd() {
+	public Date getEnd() {
 		return end;
 	}
-	public void setEnd(Calendar end) {
+	public void setEnd(Date end) {
 		this.end = end;
 	}
 	public Long getId() {
@@ -65,6 +66,12 @@ public class Entry {
 	}
 	public void setNachname(String nachname) {
 		this.nachname = nachname;
+	}
+	public boolean isSeen() {
+		return seen;
+	}
+	public void setSeen(boolean seen) {
+		this.seen = seen;
 	}
 	
 

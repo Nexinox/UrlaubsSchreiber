@@ -2,6 +2,7 @@ package eu.gemtec.UrlaubsSchreiber.VIEW;
 
 import javax.servlet.ServletException;
 
+import com.vaadin.annotations.Theme;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.cdi.access.JaasAccessControl;
 import com.vaadin.navigator.View;
@@ -10,7 +11,8 @@ import com.vaadin.ui.LoginForm;
 import com.vaadin.ui.Notification;
 import static com.vaadin.ui.Notification.Type.ERROR_MESSAGE;
 
-@CDIView("LOGIN_VIEW")
+@CDIView(LoginView.VIEW_NAME)
+@Theme("mainTheme")
 public class LoginView extends LoginForm implements View{
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "LOGIN_VIEW";

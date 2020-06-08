@@ -9,5 +9,6 @@ public interface IEntryDataacessService {
 	public List<Entry> getEntryList();
 	public Entry getEntryById(long id);
 	public void newEntry(Entry entry);
+	public void updateEntry(Entry e);
 
 }

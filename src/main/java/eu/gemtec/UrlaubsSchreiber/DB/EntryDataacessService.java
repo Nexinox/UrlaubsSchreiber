@@ -36,4 +36,12 @@ public class EntryDataacessService implements Serializable, IEntryDataacessServi
 	    EntrysEm.persist(entry);
 	    EntrysEm.getTransaction().commit();
 	}
+
+	@Override
+	public void updateEntry(Entry e) {
+		Entry tempE = EntrysEm.find(e.getClass(), e.getId());
+		EntrysEm.getTransaction().begin();
+		tempE = e;
+		EntrysEm.getTransaction().commit();
+	}
 }

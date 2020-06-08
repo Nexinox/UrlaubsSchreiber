@@ -1,40 +1,32 @@
 package eu.gemtec.UrlaubsSchreiber.VIEW;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.util.Calendar;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
+import javax.servlet.ServletException;
+
 import com.vaadin.annotations.Theme;
-import com.vaadin.cdi.CDIUI;
 import com.vaadin.cdi.CDIView;
-import com.vaadin.cdi.CDIViewProvider;
+import com.vaadin.cdi.access.JaasAccessControl;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
-import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Upload;
-import com.vaadin.ui.Upload.Receiver;
-import com.vaadin.ui.Upload.SucceededEvent;
-import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
 
 import eu.gemtec.UrlaubsSchreiber.DB.IEntryDataacessService;
 import eu.gemtec.UrlaubsSchreiber.MODEL.Entry;
 import eu.gemtec.UrlaubsSchreiber.PDF.IPDFService;
 
-@CDIView("NORMIE_VIEW")
-@RolesAllowed("")
+@CDIView(NormieView.VIEW_NAME)
 @Theme("mainTheme")
+@RolesAllowed({ "user", "felix" })
 public class NormieView extends VerticalLayout implements View {
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "NORMIE_VIEW";
-	
 
 	@Inject
 	private IPDFService pdfService;
@@ -54,34 +46,23 @@ public class NormieView extends VerticalLayout implements View {
 	DateField end;
 	Button saveAsPDF;
 	Button downloadPDF;
-	Upload uploadPDF;
-	
+	Button manageView;
+	Button settingsView;
+	Button logout;
+
 //	FileDownloader
 	FileDownloader fileDownloader;
 
-	class PDFUploader implements Receiver, SucceededListener {
-		private static final long serialVersionUID = 1L;
-
-		public ByteArrayOutputStream bos;
-
-		public OutputStream receiveUpload(String filename, String mimeType) {
-			bos = new ByteArrayOutputStream();
-			return bos;
-		}
-
-		public void uploadSucceeded(SucceededEvent event) {
-			pdfService.reciveUpload(bos.toByteArray());
-			if (!pdfService.checkFileState()) {
-				addComponent(uploadPDF);
-			} else {
-				addComponent(baseLayout);
-			}
-		}
-	};
+	private VerticalLayout makeAdminButtons() {
+		return new VerticalLayout(new Button("Manage " + entryDataacessService.getEntryList().size(), e -> {
+			getUI().getNavigator().navigateTo(FelixView.VIEW_NAME);
+		}), new Button("Settings", e -> {
+			getUI().getNavigator().navigateTo(SettingsView.VIEW_NAME);
+		}));
+	}
 
 	@Override
 	public void enter(ViewChangeEvent event) {
-		PDFUploader uploader = new PDFUploader();
 //		Initializing of Fields, Buttons, Layouts
 		vorname = new TextField();
 		nachname = new TextField();
@@ -89,13 +70,13 @@ public class NormieView extends VerticalLayout implements View {
 		end = new DateField();
 		saveAsPDF = new Button("Make PDF");
 		downloadPDF = new Button("Download PDF");
+		manageView = new Button("Manage");
+		logout = new Button("Logout");
+		settingsView = new Button("Settings");
 		fieldGroupLayout = new HorizontalLayout();
 		baseLayout = new VerticalLayout();
 		group1Layout = new VerticalLayout();
 		group2Layout = new VerticalLayout();
-
-		uploadPDF = new Upload("Upload PDF", uploader);
-		uploadPDF.addSucceededListener(uploader);
 
 //      Setting Captions of Fields
 		vorname.setCaption("Vorname:");
@@ -105,23 +86,30 @@ public class NormieView extends VerticalLayout implements View {
 
 //      Setting clickListeners
 		saveAsPDF.addClickListener(e -> {
-			if (!pdfService.checkFileState()) {
-				addComponent(uploadPDF);
-			} else {
-				fileDownloader = new FileDownloader(pdfService.fillPDF(nachname.getValue(), vorname.getValue(),
-						new Calendar.Builder().setInstant(start.getValue()).build(),
-						new Calendar.Builder().setInstant(end.getValue()).build()));
-				fileDownloader.extend(downloadPDF);
-				downloadPDF.setVisible(true);
-				Entry entry = new Entry(nachname.getValue(), vorname.getValue(),
-						new Calendar.Builder().setInstant(start.getValue()).build(),
-						new Calendar.Builder().setInstant(end.getValue()).build());
-				entryDataacessService.newEntry(entry);
+			if (!nachname.isEmpty() || !vorname.isEmpty() || !start.isEmpty() || !end.isEmpty()) {
+				if (!pdfService.checkFileState()) {
+					addComponent(new Label("Setup Not yet Complete Upload base PDF"));
+				} else {
+					fileDownloader = new FileDownloader(pdfService.fillPDF(nachname.getValue(), vorname.getValue(),
+							start.getValue(), end.getValue()));
+					fileDownloader.extend(downloadPDF);
+					downloadPDF.setVisible(true);
+					Entry entry = new Entry(nachname.getValue(), vorname.getValue(), start.getValue(), end.getValue());
+					entryDataacessService.newEntry(entry);
+				}
 			}
 		});
 		downloadPDF.setVisible(false);
 		downloadPDF.addClickListener(e -> {
 			downloadPDF.setVisible(false);
+		});
+		logout.addClickListener(e -> {
+			try {
+				JaasAccessControl.getCurrentRequest().logout();
+			} catch (ServletException e1) {
+				e1.printStackTrace();
+			}
+			getUI().getNavigator().navigateTo(LoginView.VIEW_NAME);
 		});
 
 //      Setting Margins and Spacing of Layouts
@@ -135,6 +123,10 @@ public class NormieView extends VerticalLayout implements View {
 		fieldGroupLayout.setSpacing(true);
 
 //      Layout
+		if (JaasAccessControl.getCurrentRequest().isUserInRole("felix")) {
+			baseLayout.addComponent(makeAdminButtons());
+		}
+		baseLayout.addComponent(logout);
 		group1Layout.addComponents(vorname, nachname, saveAsPDF);
 		group2Layout.addComponents(start, end, downloadPDF);
 		fieldGroupLayout.addComponent(group1Layout);
@@ -142,11 +134,11 @@ public class NormieView extends VerticalLayout implements View {
 		baseLayout.addComponents(fieldGroupLayout);
 
 		if (!pdfService.checkFileState()) {
-			addComponent(uploadPDF);
+			addComponent(new Label("Setup Not yet Complete Upload base PDF"));
 		} else {
 			addComponent(baseLayout);
 		}
-		
+
 	}
 
 }

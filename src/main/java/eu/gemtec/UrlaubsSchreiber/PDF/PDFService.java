@@ -3,7 +3,7 @@ package eu.gemtec.UrlaubsSchreiber.PDF;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.Date;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,6 +24,7 @@ public class PDFService implements IPDFService, Serializable {
 	private static final long serialVersionUID = 1L;
 	private static final short VORNAME_X = 356, VORNAME_Y = 708;
 	private static final short NACHNAME_X = 356, NACHNAME_Y = 738;
+	private static final short FELIX_X = 323, FELIX_Y = 535;
 	private static final short START_X = 236, START_Y = 617;
 	private static final short END_X = 405, END_Y = 617;
 	private static final short TEXT_SIZE = 13;
@@ -52,7 +53,7 @@ public class PDFService implements IPDFService, Serializable {
 
 	}
 
-	private void writeDate(Calendar start, Calendar end) {
+	private void writeDate(Date start, Date end) {
 		try {
 			contentStream.beginText();
 			contentStream.newLineAtOffset(START_X, START_Y);
@@ -117,23 +118,19 @@ public class PDFService implements IPDFService, Serializable {
 		}
 	}
 
-	public StreamResource fillPDF(String nName, String vName, Calendar start, Calendar end) {
-		String outputPath = "UrlaubsSchreiber\\PDFOutput\\" + nName + "." + vName + "\\Urlaubsantrag"
-				+ dateFormater.format(start.getTime()) +"-"+ dateFormater.format(end.getTime()) + ".pdf";
+	public StreamResource fillPDF(String nName, String vName, Date start, Date end) {
+		File output = new File("temp.pdf");
 		try {
 			writeName(vName, nName);
 			writeDate(start, end);
-
-			File outputDir = new File("UrlaubsSchreiber\\PDFOutput\\" + nName + "." + vName);
-			makeDirectorysIfNotExists(outputDir);
 			
-			if(new File(outputPath).exists()) {
-				new File(outputPath).delete();
+			if(output.exists()) {
+				output.delete();
 			}
 			contentStream.close();
-			doc.save(outputPath);
-			doc.close();
-			return generateDownload(new File(outputPath));
+			doc.save(output);
+			updatePDFVariables();
+			return generateDownload(output);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
@@ -155,6 +152,39 @@ public class PDFService implements IPDFService, Serializable {
 			File outputPDFDirectorys = new File("UrlaubsSchreiber\\PDFOutput\\");
 			makeDirectorysIfNotExists(pdfDirectorys);
 			makeDirectorysIfNotExists(outputPDFDirectorys);
+		}
+	}
+
+	@Override
+	public StreamResource fillFelixPDF(String vorname, String nachname, Date start, Date end) {
+		File output = new File("temp.pdf");
+		try {
+			writeName(vorname, nachname);
+			writeDate(start, end);
+			writeFelix();
+			
+			if(output.exists()) {
+				output.delete();
+			}
+			contentStream.close();
+			doc.save(output);
+			updatePDFVariables();
+			return generateDownload(output);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private void writeFelix() {
+		try {
+			contentStream.beginText();
+			contentStream.newLineAtOffset(FELIX_X, FELIX_Y);
+			contentStream.setFont(PDType1Font.COURIER, TEXT_SIZE);
+			contentStream.showText("Felix Köhler");
+			contentStream.endText();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 

@@ -8,7 +8,6 @@
 		transaction-type="RESOURCE_LOCAL">
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 		<class>eu.gemtec.UrlaubsSchreiber.MODEL.Entry</class>
-		<class>eu.gemtec.UrlaubsSchreiber.MODEL.User</class>
 		<properties>
 			<property name="javax.persistence.jdbc.driver"
 				value="org.postgresql.Driver" />
