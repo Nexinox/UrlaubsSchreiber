@@ -32,10 +32,10 @@ public class FelixView extends VerticalLayout implements View {
 	@Inject
 	private IPDFService pdfService;
 
-	int tableIndex = 0;
-	Button logout;
-	Button back;
-	Button oldEntys;
+	private int tableIndex = 0;
+	private Button logout;
+	private Button back;
+	private Button oldEntys;
 
 	@Override
 	public void enter(ViewChangeEvent event) {

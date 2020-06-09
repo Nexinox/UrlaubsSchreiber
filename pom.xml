@@ -57,11 +57,11 @@
 		    <version>42.2.12</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.eclipse.persistence/eclipselink -->
-		<dependency>
-		    <groupId>org.eclipse.persistence</groupId>
-		    <artifactId>eclipselink</artifactId>
-		    <version>3.0.0-M1</version>
-		</dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>5.4.9.Final</version>
+        </dependency>
 		<!-- https://mvnrepository.com/artifact/javax.persistence/javax.persistence-api -->
 		<dependency>
 		    <groupId>javax.persistence</groupId>
